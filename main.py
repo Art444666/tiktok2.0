@@ -1,10 +1,9 @@
 from flask import Flask, request, redirect, url_for, session, render_template_string
-import os
 
 app = Flask(__name__)
-app.secret_key = "supersecretkey"  # нужен для работы session
+app.secret_key = "supersecretkey"  # просто строка, чтобы работали session
 
-# Хранилища прямо в скрипте (в памяти)
+# Всё хранится прямо в памяти
 users = {}        # {username: {"banned": False, "ip": "1.2.3.4"}}
 comments = []     # [{"user": "ник", "text": "коммент"}]
 banned_ips = set()
@@ -172,7 +171,6 @@ def delete_comment(index):
 
 # ---------------- Запуск ----------------
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
+    app.run(host="0.0.0.0", port=5000)
 
 
