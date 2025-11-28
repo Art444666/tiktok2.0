@@ -96,7 +96,7 @@ def banned():
     return "<h1>Ваш аккаунт или IP заблокирован</h1>"
 
 # ---------------- Админ-панель ----------------
-ADMIN_PASSWORD = "94488"
+ADMIN_PASSWORD = "123456"
 
 @app.route("/admin", methods=["GET","POST"])
 def admin_login():
