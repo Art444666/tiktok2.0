@@ -2,9 +2,9 @@ from flask import Flask, request, redirect, url_for, session, render_template_st
 import os
 
 app = Flask(__name__)
-app.secret_key = os.environ.get("SECRET_KEY", "dev_secret_key")  # нужен для работы сессий
+app.secret_key = "supersecretkey"  # нужен для работы session
 
-# Хранилища в памяти
+# Хранилища прямо в скрипте (в памяти)
 users = {}        # {username: {"banned": False, "ip": "1.2.3.4"}}
 comments = []     # [{"user": "ник", "text": "коммент"}]
 banned_ips = set()
@@ -93,13 +93,15 @@ def add_comment():
 
 @app.route("/banned")
 def banned():
-    return "<h1>Ваш аккаунт или IP заблокирован. Обратитесь к администратору.</h1>"
-ADMIN_PASSWORD = "9448868"
+    return "<h1>Ваш аккаунт или IP заблокирован</h1>"
+
+# ---------------- Админ-панель ----------------
+ADMIN_PASSWORD = "94488"
 
 @app.route("/admin", methods=["GET","POST"])
 def admin_login():
-    if request.method=="POST" and request.form["password"]==ADMIN_PASSWORD:
-        session["is_admin"]=True
+    if request.method == "POST" and request.form["password"] == ADMIN_PASSWORD:
+        session["is_admin"] = True
         return redirect(url_for("admin_console"))
     return '<form method="POST"><input type="password" name="password"><button>Войти</button></form>'
 
@@ -108,7 +110,7 @@ def admin_console():
     if not session.get("is_admin"):
         return redirect(url_for("admin_login"))
     html = """
-    <h1>Админ-консоль</h1>
+    <h1>Админ‑консоль</h1>
     <h2>Пользователи</h2>
     <ul>
       {% for u, data in users.items() %}
@@ -140,13 +142,13 @@ def admin_console():
 @app.route("/admin/ban_user/<user>")
 def ban_user(user):
     if session.get("is_admin") and user in users:
-        users[user]["banned"]=True
+        users[user]["banned"] = True
     return redirect(url_for("admin_console"))
 
 @app.route("/admin/unban_user/<user>")
 def unban_user(user):
     if session.get("is_admin") and user in users:
-        users[user]["banned"]=False
+        users[user]["banned"] = False
     return redirect(url_for("admin_console"))
 
 @app.route("/admin/ban_ip", methods=["POST"])
@@ -168,8 +170,9 @@ def delete_comment(index):
         comments.pop(index)
     return redirect(url_for("admin_console"))
 
+# ---------------- Запуск ----------------
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))  # Render задаёт PORT автоматически
+    port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
 
 
