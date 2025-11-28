@@ -2,6 +2,7 @@ from flask import Flask, request, redirect, url_for, session, render_template_st
 import os
 
 app = Flask(__name__)
+app.secret_key = os.environ.get("SECRET_KEY", "dev_secret_key")  # нужен для работы сессий
 
 # Хранилища в памяти
 users = {}        # {username: {"banned": False, "ip": "1.2.3.4"}}
