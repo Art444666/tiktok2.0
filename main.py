@@ -1,7 +1,7 @@
 from flask import Flask, request, redirect, url_for, session, render_template_string
 
 app = Flask(__name__)
-app.secret_key = "supersecretkey"  # просто строка, чтобы работали session
+app.secret_key = "supersecretkey"  # нужен для работы session
 
 # Всё хранится прямо в памяти
 users = {}        # {username: {"banned": False, "ip": "1.2.3.4"}}
@@ -14,7 +14,7 @@ def check_ban():
     user = session.get("user")
     if ip in banned_ips and not session.get("is_admin"):
         return redirect(url_for("banned"))
-    if user and users.get(user, {}).get("banned") and not session.get("is_admin"):
+    if user and user in users and users[user]["banned"] and not session.get("is_admin"):
         return redirect(url_for("banned"))
 
 @app.route("/")
@@ -84,7 +84,8 @@ def register():
 @app.route("/add_comment", methods=["POST"])
 def add_comment():
     user = session.get("user")
-    if not user or users[user]["banned"]:
+    # Проверяем, что пользователь зарегистрирован
+    if not user or user not in users or users[user]["banned"]:
         return redirect(url_for("banned"))
     text = request.form["text"]
     comments.append({"user": user, "text": text})
