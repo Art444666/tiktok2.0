@@ -106,22 +106,36 @@ def admin():
     if not ip or users.get(ip, {}).get("role") != "admin":
         return redirect(url_for("home"))
     html = """
-    <h1>Админ‑панель</h1>
-    <h2>Пользователи</h2>
-    <ul>
-      {% for ip, data in users.items() %}
-        <li>{{ ip }} ({{ data.role }}) {% if data.banned %}[Забанен]{% endif %}
-          <a href="/ban/{{ ip }}">Бан</a>
-          <a href="/unban/{{ ip }}">Разбан</a>
-        </li>
-      {% endfor %}
-    </ul>
-    <h2>Комментарии</h2>
-    <ul>
-      {% for i, c in enumerate(comments) %}
-        <li>{{ c.ip }}: {{ c.text }} <a href="/delete/{{ i }}">Удалить</a></li>
-      {% endfor %}
-    </ul>
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Админ‑панель</title>
+      <style>
+        body { background:#121212; color:#e0e0e0; font-family:Arial; padding:20px; }
+        a { color:#00bfff; text-decoration:none; margin:0 5px; }
+        a:hover { text-decoration:underline; }
+        li { margin:5px 0; }
+      </style>
+    </head>
+    <body>
+      <h1>Админ‑панель</h1>
+      <h2>Пользователи</h2>
+      <ul>
+        {% for ip, data in users.items() %}
+          <li>{{ ip }} ({{ data.role }}) {% if data.banned %}[Забанен]{% endif %}
+            <a href="/ban/{{ ip }}">Бан</a>
+            <a href="/unban/{{ ip }}">Разбан</a>
+          </li>
+        {% endfor %}
+      </ul>
+      <h2>Комментарии</h2>
+      <ul>
+        {% for c in comments %}
+          <li>{{ c.ip }}: {{ c.text }} <a href="/delete/{{ loop.index0 }}">Удалить</a></li>
+        {% endfor %}
+      </ul>
+    </body>
+    </html>
     """
     return render_template_string(html, users=users, comments=comments)
 
