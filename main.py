@@ -10,11 +10,15 @@ users = {}        # {ip: {"role": "user"/"admin", "banned": False}}
 comments = []     # [{"ip": "...", "text": "..."}]
 
 @app.before_request
+@app.before_request
 def check_ban():
     ip = request.remote_addr
     user = users.get(ip)
+    # Если забанен и не админ → редиректим
     if user and user.get("banned") and not session.get("is_admin"):
-        return redirect(url_for("banned"))
+        # Разрешаем только страницы banned и admin
+        if request.endpoint not in ("banned", "admin", "unban", "unban_me"):
+            return redirect(url_for("banned"))
 
 @app.route("/", methods=["GET", "POST"])
 def home():
