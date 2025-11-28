@@ -13,10 +13,8 @@ comments = []     # [{"ip": "...", "text": "..."}]
 def check_ban():
     ip = request.remote_addr
     user = users.get(ip)
-    # Если забанен и не админ → сразу редирект на /banned
     if user and user.get("banned") and not session.get("is_admin"):
-        if request.endpoint not in ("banned", "admin", "admin_login"):
-            return redirect(url_for("banned"))
+        return redirect(url_for("banned"))
 
 @app.route("/", methods=["GET", "POST"])
 def home():
@@ -99,7 +97,7 @@ def home():
 
 @app.route("/banned")
 def banned():
-    return "<h1>Ваш IP заблокирован. Доступ к видео и комментариям закрыт.</h1>"
+    return "<h1>Ваш IP заблокирован</h1>"
 
 # ---------------- Админ-панель ----------------
 @app.route("/admin")
@@ -108,22 +106,36 @@ def admin():
     if not ip or users.get(ip, {}).get("role") != "admin":
         return redirect(url_for("home"))
     html = """
-    <h1>Админ‑панель</h1>
-    <h2>Пользователи</h2>
-    <ul>
-      {% for ip, data in users.items() %}
-        <li>{{ ip }} ({{ data.role }}) {% if data.banned %}[Забанен]{% endif %}
-          <a href="/ban/{{ ip }}">Бан</a>
-          <a href="/unban/{{ ip }}">Разбан</a>
-        </li>
-      {% endfor %}
-    </ul>
-    <h2>Комментарии</h2>
-    <ul>
-      {% for c in comments %}
-        <li>{{ c.ip }}: {{ c.text }} <a href="/delete/{{ loop.index0 }}">Удалить</a></li>
-      {% endfor %}
-    </ul>
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Админ‑панель</title>
+      <style>
+        body { background:#121212; color:#e0e0e0; font-family:Arial; padding:20px; }
+        a { color:#00bfff; text-decoration:none; margin:0 5px; }
+        a:hover { text-decoration:underline; }
+        li { margin:5px 0; }
+      </style>
+    </head>
+    <body>
+      <h1>Админ‑панель</h1>
+      <h2>Пользователи</h2>
+      <ul>
+        {% for ip, data in users.items() %}
+          <li>{{ ip }} ({{ data.role }}) {% if data.banned %}[Забанен]{% endif %}
+            <a href="/ban/{{ ip }}">Бан</a>
+            <a href="/unban/{{ ip }}">Разбан</a>
+          </li>
+        {% endfor %}
+      </ul>
+      <h2>Комментарии</h2>
+      <ul>
+        {% for c in comments %}
+          <li>{{ c.ip }}: {{ c.text }} <a href="/delete/{{ loop.index0 }}">Удалить</a></li>
+        {% endfor %}
+      </ul>
+    </body>
+    </html>
     """
     return render_template_string(html, users=users, comments=comments)
 
@@ -147,6 +159,10 @@ def delete_comment(index):
         if 0 <= index < len(comments):
             comments.pop(index)
     return redirect(url_for("admin"))
+
+# ---------------- Запуск ----------------
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=5000)
 
 # ---------------- Запуск ----------------
 if __name__ == "__main__":
